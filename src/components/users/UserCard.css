@@ -1,0 +1,164 @@
+.user-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 16px;
+}
+
+.user-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 160, 223, 0.15);
+}
+
+.user-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #F8F9FA;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.user-avatar-large {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-info h3 {
+  color: #333;
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+
+.user-email {
+  color: #666;
+  font-size: 13px;
+  margin: 0;
+}
+
+.user-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.user-card-body {
+  padding: 16px;
+}
+
+.user-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.detail-label {
+  color: #999;
+}
+
+.detail-value {
+  color: #333;
+  font-weight: 500;
+}
+
+.role-tag {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.role-administrador {
+  background: #E3F2FD;
+  color: #00A0DF;
+}
+
+.role-supervisor {
+  background: #EFE5FF;
+  color: #5856D6;
+}
+
+.role-agente {
+  background: #E3F7E3;
+  color: #34C759;
+}
+
+.user-card-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 16px;
+  border-top: 1px solid #E0E0E0;
+  background: #F8F9FA;
+}
+
+.card-action {
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.card-action.edit {
+  background: #E3F2FD;
+  color: #00A0DF;
+}
+
+.card-action.edit:hover {
+  background: #00A0DF;
+  color: white;
+}
+
+.card-action.deactivate {
+  background: #FFEBEE;
+  color: #FF3B30;
+}
+
+.card-action.deactivate:hover {
+  background: #FF3B30;
+  color: white;
+}
+
+.card-action.activate {
+  background: #E3F7E3;
+  color: #34C759;
+}
+
+.card-action.activate:hover {
+  background: #34C759;
+  color: white;
+}
+
+.card-action.delete {
+  background: #FFEBEE;
+  color: #FF3B30;
+}
+
+.card-action.delete:hover {
+  background: #FF3B30;
+  color: white;
+}

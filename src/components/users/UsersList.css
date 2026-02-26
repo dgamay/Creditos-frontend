@@ -1,0 +1,178 @@
+.users-container {
+  padding: 20px;
+  background: #F8F9FA;
+  min-height: 100%;
+}
+
+/* Estadísticas */
+.users-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-item {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.stat-value {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: #00A0DF;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Header */
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.users-header h2 {
+  color: #333;
+  font-size: 28px;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Filtros */
+.filters {
+  display: flex;
+  gap: 10px;
+}
+
+.filter-select {
+  padding: 10px;
+  border: 2px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #00A0DF;
+}
+
+/* Grid */
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+/* Tabla */
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th {
+  padding: 16px;
+  text-align: left;
+  background: #F8F9FA;
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  border-bottom: 2px solid #E0E0E0;
+}
+
+.users-table td {
+  padding: 16px;
+  border-bottom: 1px solid #E0E0E0;
+  color: #666;
+  font-size: 14px;
+}
+
+.users-table tbody tr:hover {
+  background: #F8F9FA;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar-small {
+  width: 32px;
+  height: 32px;
+  background: #00A0DF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.role-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.role-administrador {
+  background: #E3F2FD;
+  color: #00A0DF;
+}
+
+.role-supervisor {
+  background: #EFE5FF;
+  color: #5856D6;
+}
+
+.role-agente {
+  background: #E3F7E3;
+  color: #34C759;
+}
+
+.table-action {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px;
+  margin: 0 2px;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.table-action.edit:hover {
+  background: #E3F2FD;
+}
+
+.table-action.toggle:hover {
+  background: #E3F7E3;
+}
+
+.table-action.delete:hover {
+  background: #FFEBEE;
+}

@@ -1,0 +1,99 @@
+/* Estilos para el componente Button - Inspirado en Nequi */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+/* Variantes */
+.btn-primary {
+  background: linear-gradient(135deg, #00A0DF 0%, #0077A3 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 160, 223, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 160, 223, 0.4);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: white;
+  color: #00A0DF;
+  border: 2px solid #00A0DF;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #F0F9FF;
+}
+
+/* Tamaños */
+.btn-small {
+  padding: 8px 20px;
+  font-size: 14px;
+}
+
+.btn-medium {
+  padding: 12px 28px;
+  font-size: 16px;
+}
+
+.btn-large {
+  padding: 16px 36px;
+  font-size: 18px;
+}
+
+/* Full width */
+.btn-full-width {
+  width: 100%;
+}
+
+/* Estado deshabilitado */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Estado de carga */
+.btn-loading {
+  cursor: wait;
+  opacity: 0.8;
+}
+
+.btn-spinner {
+  display: inline-flex;
+  margin-right: 8px;
+}
+
+.spinner-circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Icono */
+.btn-icon {
+  font-size: 1.2em;
+  line-height: 1;
+}

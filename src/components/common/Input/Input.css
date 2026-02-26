@@ -1,0 +1,99 @@
+/* Estilos para el componente Input - Inspirado en Nequi */
+
+.input-container {
+  position: relative;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-field {
+  width: 100%;
+  height: 56px;
+  padding: 16px 16px 0;
+  font-size: 16px;
+  border: 2px solid #E0E0E0;
+  border-radius: 12px;
+  background: white;
+  transition: all 0.3s ease;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-field:focus {
+  border-color: #00A0DF;
+  box-shadow: 0 0 0 4px rgba(0, 160, 223, 0.1);
+}
+
+.input-field.has-value {
+  border-color: #00A0DF;
+}
+
+.input-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #757575;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  background: white;
+  padding: 0 4px;
+}
+
+.input-label.float {
+  top: 0;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #00A0DF;
+  font-weight: 500;
+}
+
+/* Estado de error */
+.input-container.error .input-field {
+  border-color: #FF3B30;
+}
+
+.input-container.error .input-label.float {
+  color: #FF3B30;
+}
+
+.input-error {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #FF3B30;
+  font-weight: 500;
+}
+
+/* Icono */
+.input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #757575;
+  z-index: 1;
+}
+
+.input-icon + .input-wrapper .input-field {
+  padding-left: 44px;
+}
+
+/* Estado deshabilitado */
+.input-container.disabled .input-field {
+  background: #F5F5F5;
+  border-color: #E0E0E0;
+  color: #9E9E9E;
+  cursor: not-allowed;
+}
+
+.required-star {
+  color: #FF3B30;
+  margin-left: 2px;
+}

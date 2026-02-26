@@ -1,0 +1,176 @@
+.credit-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 16px;
+  cursor: pointer;
+  border: 1px solid #E0E0E0;
+}
+
+.credit-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 160, 223, 0.15);
+}
+
+.credit-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  background: linear-gradient(135deg, #00A0DF 0%, #0077A3 100%);
+  color: white;
+}
+
+.client-info h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.credit-id {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.credit-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background: white;
+}
+
+.status-activo {
+  color: #00A0DF;
+}
+
+.status-pagado {
+  color: #34C759;
+}
+
+.status-vencido {
+  color: #FF3B30;
+}
+
+.credit-card-body {
+  padding: 16px;
+}
+
+.amounts-section {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.amount-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.amount-row .label {
+  color: #666;
+}
+
+.amount-row .value {
+  font-weight: 500;
+  color: #333;
+}
+
+.amount-row.interest .value {
+  color: #FF9500;
+  font-weight: 600;
+}
+
+.amount-row.total {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 2px dashed #E0E0E0;
+  font-weight: 600;
+}
+
+.amount-row.total .value {
+  color: #00A0DF;
+  font-size: 16px;
+}
+
+.dates-section {
+  background: #F8F9FA;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.date-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.date-row:last-child {
+  margin-bottom: 0;
+}
+
+.date-row .label {
+  color: #666;
+}
+
+.date-row .value {
+  font-weight: 500;
+  color: #333;
+}
+
+.date-row.warning .value {
+  color: #FF9500;
+  font-weight: 600;
+}
+
+.date-row.expired .value {
+  color: #FF3B30;
+  font-weight: 600;
+}
+
+.credit-card-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 16px;
+  border-top: 1px solid #E0E0E0;
+  background: #F8F9FA;
+}
+
+.card-action {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.card-action.edit {
+  background: #E3F2FD;
+  color: #00A0DF;
+}
+
+.card-action.edit:hover {
+  background: #00A0DF;
+  color: white;
+}
+
+.card-action.delete {
+  background: #FFEBEE;
+  color: #FF3B30;
+}
+
+.card-action.delete:hover {
+  background: #FF3B30;
+  color: white;
+}

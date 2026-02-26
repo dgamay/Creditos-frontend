@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+venv/
+.venv/
+env/
+
+# Compilados y builds
+dist/
+build/
+*.exe
+*.dll
+
+# Variables de entorno (Seguridad)
+.env
+.env.local
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

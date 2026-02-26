@@ -1,0 +1,137 @@
+.client-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin-bottom: 16px;
+}
+
+.client-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 160, 223, 0.15);
+}
+
+.client-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #F8F9FA;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.client-avatar {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #00A0DF 0%, #0077A3 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.client-info {
+  flex: 1;
+}
+
+.client-info h3 {
+  color: #333;
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+
+.client-email {
+  color: #666;
+  font-size: 13px;
+  margin: 0;
+}
+
+.client-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-activo {
+  background: #E3F2FD;
+  color: #00A0DF;
+}
+
+.status-inactivo {
+  background: #FFEBEE;
+  color: #FF3B30;
+}
+
+.status-pendiente {
+  background: #FFF3E0;
+  color: #FF9500;
+}
+
+.client-card-body {
+  padding: 16px;
+}
+
+.client-detail {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.detail-label {
+  color: #999;
+}
+
+.detail-value {
+  color: #333;
+  font-weight: 500;
+}
+
+.client-card-footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid #E0E0E0;
+  background: #F8F9FA;
+}
+
+.card-action {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.card-action.edit {
+  background: #E3F2FD;
+  color: #00A0DF;
+}
+
+.card-action.edit:hover {
+  background: #00A0DF;
+  color: white;
+}
+
+.card-action.delete {
+  background: #FFEBEE;
+  color: #FF3B30;
+}
+
+.card-action.delete:hover {
+  background: #FF3B30;
+  color: white;
+}
