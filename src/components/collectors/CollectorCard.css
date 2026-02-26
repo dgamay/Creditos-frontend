@@ -1,24 +1,25 @@
 .collector-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden;
   transition: transform 0.3s, box-shadow 0.3s;
-  margin-bottom: 16px;
-  border: 1px solid #E0E0E0;
+  margin-bottom: 20px;
+  cursor: pointer;
+  border: 1px solid #edf2f7;
 }
 
 .collector-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 160, 223, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 .collector-card-header {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
   padding: 20px;
-  background: linear-gradient(135deg, #5856D6 0%, #3634A3 100%);
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
 }
 
@@ -26,7 +27,7 @@
   width: 60px;
   height: 60px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,52 +41,177 @@
 }
 
 .collector-info h3 {
-  margin: 0 0 5px;
+  margin: 0 0 4px;
   font-size: 18px;
+  font-weight: 600;
 }
 
 .collector-id {
-  margin: 0;
   font-size: 12px;
   opacity: 0.9;
+}
+
+.header-icon {
+  font-size: 32px;
+  opacity: 0.3;
 }
 
 .collector-card-body {
   padding: 20px;
 }
 
-.collector-detail {
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.stat-icon {
+  font-size: 24px;
+  color: #667eea;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  display: block;
+  color: #1e293b;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.progress-section {
+  margin-bottom: 20px;
+}
+
+.progress-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #F0F0F0;
+  margin-bottom: 8px;
 }
 
-.collector-detail:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
+.progress-label {
+  color: #64748b;
+  font-size: 13px;
 }
 
-.detail-label {
-  color: #666;
+.progress-value {
+  color: #1e293b;
+  font-weight: 600;
   font-size: 14px;
 }
 
-.detail-value {
-  color: #333;
+.progress-bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.creditos-details {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.detail-chip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.chip-label {
+  color: #64748b;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.chip-value {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.chip-value.active {
+  color: #4facfe;
+}
+
+.chip-value.pagado {
+  color: #34C759;
+}
+
+.chip-value.vencido {
+  color: #FF3B30;
+}
+
+.clientes-lista {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #edf2f7;
+}
+
+.lista-label {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.clientes-mini {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cliente-tag {
+  padding: 4px 10px;
+  background: #f1f5f9;
+  border-radius: 20px;
+  color: #1e293b;
+  font-size: 12px;
   font-weight: 500;
-  font-size: 14px;
+}
+
+.cliente-tag.more {
+  background: #667eea;
+  color: white;
 }
 
 .collector-card-footer {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  padding: 15px 20px;
-  border-top: 1px solid #E0E0E0;
-  background: #F8F9FA;
+  padding: 16px 20px;
+  border-top: 1px solid #edf2f7;
+  background: #f8fafc;
 }
 
 .card-action {
@@ -103,21 +229,21 @@
 }
 
 .card-action.edit {
-  background: #E3F2FD;
-  color: #5856D6;
+  background: #e3f2fd;
+  color: #1976d2;
 }
 
 .card-action.edit:hover {
-  background: #5856D6;
+  background: #1976d2;
   color: white;
 }
 
 .card-action.delete {
-  background: #FFEBEE;
-  color: #FF3B30;
+  background: #ffebee;
+  color: #c62828;
 }
 
 .card-action.delete:hover {
-  background: #FF3B30;
+  background: #c62828;
   color: white;
 }
