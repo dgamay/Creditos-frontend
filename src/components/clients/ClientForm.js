@@ -1,19 +1,18 @@
 /**
  * Componente ClientForm - Formulario para crear/editar clientes
- * AHORA CONECTADO A LA API REAL y con selector de cobradores
+ * VERSIÓN SIMPLIFICADA - Solo campos que existen en el modelo
  */
 
 import React, { useState, useEffect } from 'react';
 import './ClientForm.css';
 
-const ClientForm = ({ client, onSave, onCancel, cobradores = [] }) => {
-  // Estado del formulario
+const ClientForm = ({ client, onSave, onCancel }) => {
+  // Estado del formulario - SOLO los campos que existen en el modelo
   const [formData, setFormData] = useState({
     nombre: '',
     cedula: '',
     direccion: '',
-    celular: '',
-    cobrador_id: ''
+    celular: ''
   });
 
   // Estado de errores
@@ -26,8 +25,7 @@ const ClientForm = ({ client, onSave, onCancel, cobradores = [] }) => {
         nombre: client.nombre || '',
         cedula: client.cedula || '',
         direccion: client.direccion || '',
-        celular: client.celular || '',
-        cobrador_id: client.cobrador_id || ''
+        celular: client.celular || ''
       });
     }
   }, [client]);
@@ -46,9 +44,11 @@ const ClientForm = ({ client, onSave, onCancel, cobradores = [] }) => {
 
     if (!formData.celular.trim()) {
       newErrors.celular = 'El celular es requerido';
-    } else if (!/^\d{10,}$/.test(formData.celular.replace(/\D/g, ''))) {
-      newErrors.celular = 'Celular inválido (mínimo 10 dígitos)';
+    } else if (!/^\d{7,15}$/.test(formData.celular.replace(/\D/g, ''))) {
+      newErrors.celular = 'Celular inválido (mínimo 7 dígitos)';
     }
+
+    // dirección es opcional, no se valida
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -69,6 +69,7 @@ const ClientForm = ({ client, onSave, onCancel, cobradores = [] }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
+      console.log('📤 Enviando cliente a API:', formData);
       onSave(formData);
     }
   };
@@ -139,26 +140,6 @@ const ClientForm = ({ client, onSave, onCancel, cobradores = [] }) => {
         />
       </div>
 
-      {/* NUEVO: Selección de Cobrador */}
-      <div className="form-group">
-        <label htmlFor="cobrador_id">Cobrador asignado</label>
-        <select
-          id="cobrador_id"
-          name="cobrador_id"
-          value={formData.cobrador_id}
-          onChange={handleChange}
-          className={errors.cobrador_id ? 'error' : ''}
-        >
-          <option value="">Selecciona un cobrador</option>
-          {cobradores.map(cobrador => (
-            <option key={cobrador._id} value={cobrador._id}>
-              {cobrador.nombre} - {cobrador.celular}
-            </option>
-          ))}
-        </select>
-        {errors.cobrador_id && <span className="error-message">{errors.cobrador_id}</span>}
-      </div>
-
       {/* Botones de acción */}
       <div className="form-actions">
         <button type="button" className="btn-cancel" onClick={onCancel}>
@@ -172,4 +153,4 @@ const ClientForm = ({ client, onSave, onCancel, cobradores = [] }) => {
   );
 };
 
-export default ClientForm; // <-- ¡IMPORTANTE! Esta línea es la que faltaba
+export default ClientForm;

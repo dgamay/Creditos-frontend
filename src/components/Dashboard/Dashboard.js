@@ -2,7 +2,7 @@
 // DASHBOARD PRINCIPAL CON CRUD COMPLETO
 // ============================================
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   FiHome, 
   FiDollarSign, 
@@ -63,49 +63,22 @@ const Dashboard = ({ user, onLogout }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Cargar datos reales al montar el componente
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Cargar clientes y cobradores en paralelo
-        const [clientesData, cobradoresData] = await Promise.all([
-          clientesService.getAll(),
-          cobradoresService.getAll()
-        ]);
-
-        setClientes(clientesData);
-        setCobradores(cobradoresData);
-
-        // Cargar créditos de todos los clientes
-        const creditosData = await creditsService.getAllFromClientes(clientesData);
-        setCreditos(creditosData);
-
-        // Calcular estadísticas
-        calcularEstadisticas(clientesData, cobradoresData, creditosData);
-      } catch (error) {
-        console.error('Error al cargar datos del dashboard:', error);
-        usarDatosEjemplo();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // Función para calcular estadísticas
-  const calcularEstadisticas = (clientesData, cobradoresData, creditosData) => {
+  // ============================================
+  // FUNCIÓN PARA CALCULAR ESTADÍSTICAS
+  // ============================================
+  const calcularEstadisticas = useCallback((clientesData, cobradoresData, creditosData) => {
     const today = new Date();
     
-    const creditosActivos = creditosData.filter(c => c.estado === 'pendiente').length;
+    // Clasificar créditos
+    const creditosActivos = creditosData.filter(c => c.estado === 'activo' || c.estado === 'pendiente').length;
     const creditosPagados = creditosData.filter(c => c.estado === 'pagado').length;
     const creditosVencidos = creditosData.filter(c => {
-      if (c.estado !== 'pendiente') return false;
+      if (c.estado !== 'pendiente' && c.estado !== 'activo') return false;
       const paymentDate = new Date(c.fecha_pago);
       return paymentDate < today;
     }).length;
 
+    // Calcular montos
     const montoTotalPrestado = creditosData.reduce((sum, c) => sum + (c.monto_prestado || 0), 0);
     const montoTotalAPagar = creditosData.reduce((sum, c) => sum + (c.monto_por_pagar || 0), 0);
 
@@ -120,7 +93,41 @@ const Dashboard = ({ user, onLogout }) => {
       montoTotalAPagar,
       interesesGenerados: montoTotalAPagar - montoTotalPrestado
     });
-  };
+  }, []);
+
+  // ============================================
+  // FUNCIÓN PARA CARGAR DATOS (puede ser llamada externamente)
+  // ============================================
+  const cargarDatos = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Cargar clientes y cobradores en paralelo
+      const [clientesData, cobradoresData] = await Promise.all([
+        clientesService.getAll(),
+        cobradoresService.getAll()
+      ]);
+
+      setClientes(clientesData);
+      setCobradores(cobradoresData);
+
+      // Cargar créditos de todos los clientes
+      const creditosData = await creditsService.getAllFromClientes(clientesData);
+      setCreditos(creditosData);
+
+      // Calcular estadísticas
+      calcularEstadisticas(clientesData, cobradoresData, creditosData);
+    } catch (error) {
+      console.error('Error al cargar datos del dashboard:', error);
+      usarDatosEjemplo();
+    } finally {
+      setLoading(false);
+    }
+  }, [calcularEstadisticas]);
+
+  // Cargar datos al montar el componente
+  useEffect(() => {
+    cargarDatos();
+  }, [cargarDatos]);
 
   // Datos de ejemplo por si la API falla
   const usarDatosEjemplo = () => {
@@ -131,22 +138,10 @@ const Dashboard = ({ user, onLogout }) => {
     
     const cobradoresEjemplo = [
       { _id: '1', nombre: 'David España', celular: '3110000023', direccion: 'Cali', cedula: '2232' },
-      { _id: '2', nombre: 'Paolo Pantoja', celular: '3110000021', direccion: 'El Prado', cedula: '2226' },
-      { _id: '3', nombre: 'Ana López', celular: '3110000033', direccion: 'Centro', cedula: '2233' }
+      { _id: '2', nombre: 'Paolo Pantoja', celular: '3110000021', direccion: 'El Prado', cedula: '2226' }
     ];
 
-    const creditosEjemplo = [
-      {
-        _id: '1',
-        cliente_id: '1',
-        clienteNombre: 'María González',
-        monto_prestado: 500000,
-        monto_por_pagar: 650000,
-        fecha_origen: '2025-02-20',
-        fecha_pago: '2025-03-07',
-        estado: 'pendiente'
-      }
-    ];
+    const creditosEjemplo = [];
 
     setClientes(clientesEjemplo);
     setCobradores(cobradoresEjemplo);
@@ -175,12 +170,6 @@ const Dashboard = ({ user, onLogout }) => {
       label: 'Clientes', 
       icon: <FiDollarSign />,
       description: `${stats.totalClientes} clientes`
-    },
-    { 
-      id: 'usuarios', 
-      label: 'Usuarios', 
-      icon: <FiUsers />,
-      description: 'Administración'
     },
     { 
       id: 'cobradores', 
@@ -230,11 +219,12 @@ const Dashboard = ({ user, onLogout }) => {
 
     switch (currentView) {
       case 'clientes':
-        return <ClientsList />;
+        // Pasar la función de recarga al componente ClientsList
+        return <ClientsList onDataChange={cargarDatos} />;
       case 'cobradores':
-        return <CobradoresList />;
+        return <CobradoresList onDataChange={cargarDatos} />;
       case 'creditos':
-        return <CreditsList />;
+        return <CreditsList onDataChange={cargarDatos} />;
       case 'reportes':
         return (
           <div className="reports-container">

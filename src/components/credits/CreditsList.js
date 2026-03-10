@@ -1,6 +1,7 @@
 // ============================================
-// COMPONENTE LISTA DE CRÉDITOS
-// Adaptado a la API real
+// COMPONENTE LISTA DE CRÉDITOS - VERSIÓN MEJORADA
+// Permite marcar créditos como pagados con comisión del 20%
+// Notifica cambios al dashboard
 // ============================================
 
 import React, { useState, useEffect } from 'react';
@@ -13,7 +14,11 @@ import clientesService from '../../services/clientes/clientes.service';
 import cobradoresService from '../../services/cobradores/cobradores.service';
 import './CreditsList.css';
 
-const CreditsList = () => {
+/**
+ * Componente principal para gestionar créditos
+ * @param {Function} onDataChange - Función para notificar cambios al dashboard
+ */
+const CreditsList = ({ onDataChange }) => {
   const [credits, setCredits] = useState([]);
   const [clients, setClients] = useState([]);
   const [collectors, setCollectors] = useState([]);
@@ -26,46 +31,56 @@ const CreditsList = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Cargar datos iniciales
+  // ============================================
+  // FUNCIÓN PARA CARGAR TODOS LOS DATOS
+  // ============================================
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // Cargar clientes y cobradores
+      const [clientesData, cobradoresData] = await Promise.all([
+        clientesService.getAll(),
+        cobradoresService.getAll()
+      ]);
+
+      setClients(clientesData);
+      setCollectors(cobradoresData);
+
+      // Crear mapas para búsqueda rápida
+      const collectorMap = {};
+      cobradoresData.forEach(c => {
+        collectorMap[c._id] = c.nombre;
+      });
+
+      const clientMap = {};
+      clientesData.forEach(c => {
+        clientMap[c._id] = { nombre: c.nombre, cedula: c.cedula };
+      });
+
+      // Obtener créditos de todos los clientes
+      const allCredits = await creditsService.getAllFromClientes(clientesData);
+      
+      // Enriquecer con nombres
+      const enrichedCredits = allCredits.map(credit => ({
+        ...credit,
+        cobrador: collectorMap[credit.cobrador_id] || 'No asignado',
+        clienteNombre: clientMap[credit.cliente_id]?.nombre || 'Desconocido',
+        clienteCedula: clientMap[credit.cliente_id]?.cedula || 'N/A'
+      }));
+
+      setCredits(enrichedCredits);
+      setFilteredCredits(enrichedCredits);
+    } catch (err) {
+      setError('Error al cargar los datos');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar datos al montar el componente
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Cargar clientes y cobradores
-        const [clientesData, cobradoresData] = await Promise.all([
-          clientesService.getAll(),
-          cobradoresService.getAll()
-        ]);
-
-        setClients(clientesData);
-        setCollectors(cobradoresData);
-
-        // Crear un mapa de cobradores para búsqueda rápida
-        const collectorMap = {};
-        cobradoresData.forEach(c => {
-          collectorMap[c._id] = c.nombre;
-        });
-
-        // Obtener créditos de todos los clientes
-        const allCredits = await creditsService.getAllFromClientes(clientesData);
-        
-        // Enriquecer con nombre del cobrador
-        const enrichedCredits = allCredits.map(credit => ({
-          ...credit,
-          cobrador: collectorMap[credit.cobrador_id] || 'No asignado'
-        }));
-
-        setCredits(enrichedCredits);
-        setFilteredCredits(enrichedCredits);
-      } catch (err) {
-        setError('Error al cargar los datos');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    loadData();
   }, []);
 
   // Filtrar créditos por búsqueda
@@ -82,7 +97,9 @@ const CreditsList = () => {
     }
   }, [searchTerm, credits]);
 
-  // Calcular estadísticas
+  // ============================================
+  // CALCULAR ESTADÍSTICAS
+  // ============================================
   const calculateStats = () => {
     const totalLoaned = credits.reduce((sum, c) => sum + (c.monto_prestado || 0), 0);
     const totalToPay = credits.reduce((sum, c) => sum + (c.monto_por_pagar || 0), 0);
@@ -97,12 +114,26 @@ const CreditsList = () => {
       return paymentDate < today;
     }).length;
 
-    return { totalLoaned, totalToPay, pending, paid, overdue };
+    // Calcular total de comisiones pagadas
+    const totalComisiones = credits
+      .filter(c => c.estado === 'pagado' && c.comision_cobrador)
+      .reduce((sum, c) => sum + (c.comision_cobrador || 0), 0);
+
+    return { 
+      totalLoaned, 
+      totalToPay, 
+      pending, 
+      paid, 
+      overdue,
+      totalComisiones 
+    };
   };
 
   const stats = calculateStats();
 
-  // Handlers
+  // ============================================
+  // HANDLERS
+  // ============================================
   const showAlert = (type, message) => setAlert({ type, message });
 
   const handleCreate = () => {
@@ -112,21 +143,10 @@ const CreditsList = () => {
 
   const handleSave = async (creditData) => {
     try {
-      const newCredit = await creditsService.create(creditData);
-      
-      // Buscar el cliente y cobrador para mostrar nombres
-      const client = clients.find(c => c._id === newCredit.cliente_id);
-      const collector = collectors.find(c => c._id === newCredit.cobrador_id);
-      
-      const enrichedCredit = {
-        ...newCredit,
-        clienteNombre: client?.nombre,
-        clienteCedula: client?.cedula,
-        cobrador: collector?.nombre
-      };
-
-      setCredits(prev => [...prev, enrichedCredit]);
+      await creditsService.create(creditData);
       showAlert('success', 'Crédito creado exitosamente');
+      await loadData(); // Recargar datos
+      if (onDataChange) onDataChange(); // Notificar al dashboard
       setModalOpen(false);
     } catch (err) {
       showAlert('error', 'Error al crear el crédito');
@@ -136,6 +156,20 @@ const CreditsList = () => {
   const handleViewDetails = (credit) => {
     setSelectedCredit(credit);
     setDetailModalOpen(true);
+  };
+
+  // ============================================
+  // NUEVO: MARCAR CRÉDITO COMO PAGADO CON COMISIÓN
+  // ============================================
+  const handleMarkAsPaid = async (creditId, cobradorId) => {
+    try {
+      await creditsService.marcarComoPagado(creditId, cobradorId);
+      showAlert('success', 'Crédito marcado como pagado. Comisión del 20% asignada al cobrador.');
+      await loadData(); // Recargar datos
+      if (onDataChange) onDataChange(); // Notificar al dashboard
+    } catch (err) {
+      showAlert('error', 'Error al marcar el crédito como pagado');
+    }
   };
 
   // Formatear moneda
@@ -157,7 +191,7 @@ const CreditsList = () => {
         />
       )}
 
-      {/* Estadísticas */}
+      {/* Estadísticas incluyendo comisiones */}
       <div className="credits-stats">
         <div className="stat-item highlight">
           <span className="stat-value">{formatCurrency(stats.totalLoaned)}</span>
@@ -178,6 +212,10 @@ const CreditsList = () => {
         <div className="stat-item">
           <span className="stat-value">{stats.paid}</span>
           <span className="stat-label">Pagados</span>
+        </div>
+        <div className="stat-item success">
+          <span className="stat-value">{formatCurrency(stats.totalComisiones)}</span>
+          <span className="stat-label">Comisiones (20%)</span>
         </div>
       </div>
 
@@ -229,6 +267,8 @@ const CreditsList = () => {
               key={credit._id}
               credit={credit}
               onViewDetails={handleViewDetails}
+              onMarkAsPaid={handleMarkAsPaid}
+              collectors={collectors}
             />
           ))}
         </div>
@@ -272,6 +312,12 @@ const CreditsList = () => {
                 <label>Interés pagado:</label>
                 <span>{formatCurrency(selectedCredit.monto_por_pagar - selectedCredit.monto_prestado)}</span>
               </div>
+              {selectedCredit.comision_cobrador && (
+                <div className="detail-item highlight">
+                  <label>Comisión cobrador (20%):</label>
+                  <span>{formatCurrency(selectedCredit.comision_cobrador)}</span>
+                </div>
+              )}
               <div className="detail-item">
                 <label>Fecha origen:</label>
                 <span>{new Date(selectedCredit.fecha_origen).toLocaleDateString()}</span>

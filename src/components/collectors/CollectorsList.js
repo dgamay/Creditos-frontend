@@ -1,9 +1,9 @@
 // ============================================
-// COMPONENTE COLLECTORS LIST
-// Con useCallback para evitar warnings
+// COMPONENTE COLLECTORS LIST - VERSIÓN CON LOGS
+// Para depurar por qué no se ven los datos
 // ============================================
 
-import React, { useState, useEffect, useCallback } from 'react'; // 👈 Importar useCallback
+import React, { useState, useEffect, useCallback } from 'react';
 import Modal from '../common/Modal/Modal';
 import Alert from '../common/Alert/Alert';
 import CollectorCard from './CollectorCard';
@@ -34,105 +34,176 @@ const CollectorsList = () => {
     totalPendiente: 0
   });
 
-  // Datos de ejemplo - Envuelto en useCallback
-  const usarDatosEjemplo = useCallback(() => {
-    const collectorsEjemplo = [
-      {
-        _id: '1',
-        nombre: 'David España',
-        celular: '3110000023',
-        direccion: 'Cali',
-        cedula: '2232',
-        totalClientes: 5,
-        totalCreditos: 8,
-        creditosActivos: 3,
-        creditosPagados: 4,
-        creditosVencidos: 1,
-        totalPrestado: 4500000,
-        totalPagado: 2500000,
-        totalPendiente: 2000000,
-        porcentajeCobrado: 55.5,
-        clientes: [
-          { _id: 'c1', nombre: 'María González' },
-          { _id: 'c2', nombre: 'Carlos Rodríguez' },
-          { _id: 'c3', nombre: 'Ana Martínez' }
-        ]
-      },
-      {
-        _id: '2',
-        nombre: 'Paolo Pantoja',
-        celular: '3110000021',
-        direccion: 'El Prado',
-        cedula: '2226',
-        totalClientes: 3,
-        totalCreditos: 5,
-        creditosActivos: 2,
-        creditosPagados: 3,
-        creditosVencidos: 0,
-        totalPrestado: 3200000,
-        totalPagado: 2100000,
-        totalPendiente: 1100000,
-        porcentajeCobrado: 65.6,
-        clientes: [
-          { _id: 'c4', nombre: 'Juan Pérez' },
-          { _id: 'c5', nombre: 'Laura Sánchez' }
-        ]
+  // ============================================
+  // VERSIÓN SIMPLIFICADA - Solo para ver qué datos llegan
+  // ============================================
+  // ============================================
+// VERSIÓN CORREGIDA - Asocia créditos usando cobrador_id del crédito
+// ============================================
+const calcularEstadisticasCobradores = useCallback((cobradores, clientes, creditos) => {
+  console.log('📊 CALCULANDO ESTADÍSTICAS (VERSIÓN CORREGIDA)');
+  
+  // Primero, crear un mapa de clientes por ID para fácil acceso
+  const clientesPorId = {};
+  clientes.forEach(cliente => {
+    clientesPorId[cliente._id] = cliente;
+  });
+
+  const cobradoresConStats = cobradores.map(cobrador => {
+    console.log(`\n🔹 Procesando cobrador: ${cobrador.nombre} (${cobrador._id})`);
+    
+    // 1. Buscar TODOS los créditos que tienen este cobrador_id
+    const creditosCobrador = creditos.filter(c => {
+      const pertenece = c.cobrador_id === cobrador._id;
+      if (pertenece) {
+        console.log(`  ✅ Crédito encontrado: $${c.monto_prestado} para cliente ${c.cliente_id}`);
       }
-    ];
-
-    setCollectors(collectorsEjemplo);
-    setFilteredCollectors(collectorsEjemplo);
-    calcularEstadisticasGlobales(collectorsEjemplo);
-  }, []); // useCallback sin dependencias porque no usa variables externas
-
-  // Función para calcular estadísticas globales
-  const calcularEstadisticasGlobales = useCallback((collectorsData) => {
-    const totalCollectors = collectorsData.length;
-    const totalClientesAsignados = collectorsData.reduce((sum, c) => sum + (c.totalClientes || 0), 0);
-    const totalPrestado = collectorsData.reduce((sum, c) => sum + (c.totalPrestado || 0), 0);
-    const totalCobrado = collectorsData.reduce((sum, c) => sum + (c.totalPagado || 0), 0);
-    const totalPendiente = totalPrestado - totalCobrado;
-
-    setStats({
-      totalCollectors,
-      totalClientesAsignados,
-      totalPrestado,
-      totalCobrado,
-      totalPendiente
+      return pertenece;
     });
-  }, []); // useCallback sin dependencias
+    
+    console.log(`  → Total créditos: ${creditosCobrador.length}`);
 
-  // Cargar datos - AHORA CON DEPENDENCIAS CORRECTAS
+    // 2. Obtener IDs únicos de clientes de estos créditos
+    const clienteIdsDeCreditos = [...new Set(creditosCobrador.map(c => c.cliente_id))];
+    
+    // 3. Obtener los clientes completos
+    const clientesAsignados = clienteIdsDeCreditos
+      .map(id => clientesPorId[id])
+      .filter(c => c); // Filtrar undefined
+
+    console.log(`  → Clientes únicos: ${clientesAsignados.length}`);
+    clientesAsignados.forEach(c => console.log(`     - ${c.nombre}`));
+
+    // 4. Calcular diferentes estados de créditos
+    const hoy = new Date();
+    
+    const creditosActivos = creditosCobrador.filter(c => 
+      c.estado === 'pendiente' && new Date(c.fecha_pago) >= hoy
+    ).length;
+
+    const creditosVencidos = creditosCobrador.filter(c => 
+      c.estado === 'pendiente' && new Date(c.fecha_pago) < hoy
+    ).length;
+
+    const creditosPagados = creditosCobrador.filter(c => c.estado === 'pagado').length;
+
+    console.log(`  → Activos: ${creditosActivos}, Vencidos: ${creditosVencidos}, Pagados: ${creditosPagados}`);
+
+    // 5. Montos
+    const totalPrestado = creditosCobrador.reduce((sum, c) => {
+      return sum + (c.monto_prestado || 0);
+    }, 0);
+    
+    const totalPagado = creditosCobrador
+      .filter(c => c.estado === 'pagado')
+      .reduce((sum, c) => sum + (c.monto_prestado || 0), 0);
+    
+    const totalPendiente = totalPrestado - totalPagado;
+    const porcentajeCobrado = totalPrestado > 0 ? (totalPagado / totalPrestado) * 100 : 0;
+
+    console.log(`  → Monto prestado: $${totalPrestado}, Pagado: $${totalPagado}`);
+
+    return {
+      ...cobrador,
+      totalClientes: clientesAsignados.length,
+      clientes: clientesAsignados,
+      totalCreditos: creditosCobrador.length,
+      creditosActivos,
+      creditosPagados,
+      creditosVencidos,
+      totalPrestado,
+      totalPagado,
+      totalPendiente,
+      porcentajeCobrado
+    };
+  });
+
+  console.log('✅ Estadísticas finales:', cobradoresConStats);
+  return cobradoresConStats;
+}, []);
+
+  // ============================================
+  // CARGAR DATOS DESDE LA API
+  // ============================================
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      console.log('🔄 INICIANDO CARGA DE DATOS');
+      
       try {
-        // Cargar clientes y créditos primero
-        const [clientesData, creditosData] = await Promise.all([
-          clientesService.getAll(),
-          creditsService.getAllFromClientes([])
-        ]);
-
-        // Obtener cobradores con estadísticas
-        const cobradoresData = await cobradoresService.getEstadisticasTodos(clientesData, creditosData);
+        // 1. Obtener cobradores
+        console.log('1️⃣ Obteniendo cobradores...');
+        const cobradoresData = await cobradoresService.getAll();
+        console.log('✅ Cobradores:', cobradoresData);
         
-        setCollectors(cobradoresData);
-        setFilteredCollectors(cobradoresData);
+        // 2. Obtener clientes
+        console.log('2️⃣ Obteniendo clientes...');
+        const clientesData = await clientesService.getAll();
+        console.log('✅ Clientes:', clientesData);
+        
+        // 3. Obtener créditos
+        console.log('3️⃣ Obteniendo créditos de todos los clientes...');
+        let creditosData = [];
+        
+        for (const cliente of clientesData) {
+          console.log(`   → Buscando créditos de cliente: ${cliente.nombre} (${cliente._id})`);
+          try {
+            const creditosCliente = await creditsService.getByCliente(cliente._id);
+            console.log(`      → Encontrados ${creditosCliente.length} créditos`);
+            creditosData = [...creditosData, ...creditosCliente];
+          } catch (error) {
+            console.log(`      → Error o sin créditos para este cliente`);
+          }
+        }
+        
+        console.log('✅ Total créditos:', creditosData.length);
+        if (creditosData.length > 0) {
+          console.log('Primer crédito (estructura):', creditosData[0]);
+        }
 
-        // Calcular estadísticas globales
-        calcularEstadisticasGlobales(cobradoresData);
+        // 4. Calcular estadísticas
+        console.log('4️⃣ Calculando estadísticas...');
+        const cobradoresConStats = calcularEstadisticasCobradores(
+          cobradoresData, 
+          clientesData, 
+          creditosData
+        );
+        
+        console.log('✅ Resultado final:', cobradoresConStats);
+        
+        setCollectors(cobradoresConStats);
+        setFilteredCollectors(cobradoresConStats);
+
+        // 5. Calcular estadísticas globales
+        const totalPrestado = cobradoresConStats.reduce((sum, c) => sum + (c.totalPrestado || 0), 0);
+        const totalCobrado = cobradoresConStats.reduce((sum, c) => sum + (c.totalPagado || 0), 0);
+        
+        setStats({
+          totalCollectors: cobradoresConStats.length,
+          totalClientesAsignados: cobradoresConStats.reduce((sum, c) => sum + (c.totalClientes || 0), 0),
+          totalPrestado,
+          totalCobrado,
+          totalPendiente: totalPrestado - totalCobrado
+        });
+
       } catch (err) {
-        console.error('Error al cargar datos:', err);
-        usarDatosEjemplo(); // 👈 Ahora esta función es estable gracias a useCallback
+        console.error('❌ ERROR GLOBAL:', err);
+        setAlert({ 
+          type: 'error', 
+          message: 'Error al cargar los datos. Por favor, intenta de nuevo.' 
+        });
       } finally {
         setLoading(false);
+        console.log('🏁 CARGA COMPLETADA');
       }
     };
 
     fetchData();
-  }, [calcularEstadisticasGlobales, usarDatosEjemplo]); // 👈 Dependencias incluidas
+  }, [calcularEstadisticasCobradores]);
 
-  // Filtrar cobradores
+  // ============================================
+  // FILTRAR COBRADORES POR BÚSQUEDA
+  // ============================================
   useEffect(() => {
     if (searchTerm.trim() === '') {
       setFilteredCollectors(collectors);
@@ -186,6 +257,7 @@ const CollectorsList = () => {
         const nuevoConStats = {
           ...nuevo,
           totalClientes: 0,
+          clientes: [],
           totalCreditos: 0,
           creditosActivos: 0,
           creditosPagados: 0,
@@ -193,8 +265,7 @@ const CollectorsList = () => {
           totalPrestado: 0,
           totalPagado: 0,
           totalPendiente: 0,
-          porcentajeCobrado: 0,
-          clientes: []
+          porcentajeCobrado: 0
         };
         setCollectors(prev => [...prev, nuevoConStats]);
         showAlert('success', 'Cobrador creado exitosamente');
@@ -211,7 +282,6 @@ const CollectorsList = () => {
     }
   };
 
-  // Formatear moneda
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -285,14 +355,12 @@ const CollectorsList = () => {
             <button
               className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
               onClick={() => setViewMode('grid')}
-              title="Vista cuadrícula"
             >
               📱
             </button>
             <button
               className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
               onClick={() => setViewMode('list')}
-              title="Vista tabla"
             >
               📋
             </button>
@@ -329,6 +397,7 @@ const CollectorsList = () => {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onViewDetails={handleViewDetails}
+              formatCurrency={formatCurrency}
             />
           ))}
         </div>
@@ -369,7 +438,7 @@ const CollectorsList = () => {
                       <div className="progress-bar-mini">
                         <div 
                           className="progress-fill-mini" 
-                          style={{ width: `${collector.porcentajeCobrado || 0}%` }}
+                          style={{ width: `${Math.min(collector.porcentajeCobrado || 0, 100)}%` }}
                         ></div>
                       </div>
                       <span>{Math.round(collector.porcentajeCobrado || 0)}%</span>
@@ -416,79 +485,86 @@ const CollectorsList = () => {
       <Modal
         isOpen={detailModalOpen}
         onClose={() => setDetailModalOpen(false)}
-        title="Detalles del Cobrador"
+        title={`${selectedCollector?.nombre || 'Cobrador'}`}
         size="large"
       >
         {selectedCollector && (
-          <div className="collector-details">
+          <div className="collector-details-modal">
             <div className="details-header">
-              <div className="details-avatar">
-                {selectedCollector.nombre?.charAt(0).toUpperCase()}
+              <h2>{selectedCollector.nombre}</h2>
+              <p className="collector-id">ID: {selectedCollector._id?.slice(-6) || 'N/A'}</p>
+            </div>
+
+            <div className="details-grid-principal">
+              <div className="detail-card">
+                <span className="detail-label">CLIENTES</span>
+                <span className="detail-value large">{selectedCollector.totalClientes || 0}</span>
               </div>
-              <div className="details-title">
-                <h3>{selectedCollector.nombre}</h3>
-                <p>Cédula: {selectedCollector.cedula} | Celular: {selectedCollector.celular}</p>
-                <p>Dirección: {selectedCollector.direccion}</p>
+              <div className="detail-card">
+                <span className="detail-label">CRÉDITOS</span>
+                <span className="detail-value large">{selectedCollector.totalCreditos || 0}</span>
+              </div>
+              <div className="detail-card">
+                <span className="detail-label">PRESTADO</span>
+                <span className="detail-value large">{formatCurrency(selectedCollector.totalPrestado)}</span>
+              </div>
+              <div className="detail-card">
+                <span className="detail-label">COBRADO</span>
+                <span className="detail-value large success">{formatCurrency(selectedCollector.totalPagado)}</span>
               </div>
             </div>
 
-            <div className="details-stats">
-              <div className="stat-card detail">
-                <FiUsers />
-                <div>
-                  <label>Clientes Asignados</label>
-                  <span>{selectedCollector.totalClientes || 0}</span>
-                </div>
+            <div className="efectividad-section">
+              <h3>Efectividad de cobro</h3>
+              <div className="efectividad-value">
+                <span className="porcentaje">{Math.round(selectedCollector.porcentajeCobrado || 0)}%</span>
               </div>
-              <div className="stat-card detail">
-                <FiCreditCard />
-                <div>
-                  <label>Créditos Gestionados</label>
-                  <span>{selectedCollector.totalCreditos || 0}</span>
-                </div>
-              </div>
-              <div className="stat-card detail">
-                <FiDollarSign />
-                <div>
-                  <label>Total Prestado</label>
-                  <span>{formatCurrency(selectedCollector.totalPrestado)}</span>
-                </div>
-              </div>
-              <div className="stat-card detail success">
-                <FiDollarSign />
-                <div>
-                  <label>Total Cobrado</label>
-                  <span>{formatCurrency(selectedCollector.totalPagado)}</span>
-                </div>
+              <div className="progress-bar-large">
+                <div 
+                  className="progress-fill-large" 
+                  style={{ width: `${Math.min(selectedCollector.porcentajeCobrado || 0, 100)}%` }}
+                ></div>
               </div>
             </div>
 
-            <div className="details-creditos">
-              <h4>Distribución de Créditos</h4>
-              <div className="credit-distribution">
-                <div className="dist-item">
-                  <span className="dist-label">Activos</span>
-                  <span className="dist-value active">{selectedCollector.creditosActivos || 0}</span>
+            <div className="estado-creditos">
+              <div className="estado-item">
+                <span className="estado-label">ACTIVOS</span>
+                <span className="estado-value active">{selectedCollector.creditosActivos || 0}</span>
+              </div>
+              <div className="estado-item">
+                <span className="estado-label">PAGADOS</span>
+                <span className="estado-value pagado">{selectedCollector.creditosPagados || 0}</span>
+              </div>
+              <div className="estado-item">
+                <span className="estado-label">VENCIDOS</span>
+                <span className="estado-value vencido">{selectedCollector.creditosVencidos || 0}</span>
+              </div>
+            </div>
+
+            <div className="contacto-info">
+              <h4>Información de contacto</h4>
+              <div className="contacto-grid">
+                <div className="contacto-item">
+                  <strong>📞 Teléfono:</strong> {selectedCollector.celular}
                 </div>
-                <div className="dist-item">
-                  <span className="dist-label">Pagados</span>
-                  <span className="dist-value pagado">{selectedCollector.creditosPagados || 0}</span>
+                <div className="contacto-item">
+                  <strong>📍 Dirección:</strong> {selectedCollector.direccion}
                 </div>
-                <div className="dist-item">
-                  <span className="dist-label">Vencidos</span>
-                  <span className="dist-value vencido">{selectedCollector.creditosVencidos || 0}</span>
+                <div className="contacto-item">
+                  <strong>🆔 Cédula:</strong> {selectedCollector.cedula}
                 </div>
               </div>
             </div>
 
             {selectedCollector.clientes && selectedCollector.clientes.length > 0 && (
-              <div className="details-clientes">
+              <div className="clientes-asignados">
                 <h4>Clientes Asignados</h4>
-                <div className="clientes-lista-detalle">
+                <div className="clientes-lista">
                   {selectedCollector.clientes.map(cliente => (
-                    <div key={cliente._id} className="cliente-item">
+                    <div key={cliente._id} className="cliente-item-detalle">
                       <span className="cliente-nombre">{cliente.nombre}</span>
-                      <span className="cliente-cedula">{cliente.cedula}</span>
+                      <span className="cliente-cedula">C.C. {cliente.cedula}</span>
                     </div>
                   ))}
                 </div>

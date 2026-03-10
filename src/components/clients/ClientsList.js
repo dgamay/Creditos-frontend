@@ -1,16 +1,19 @@
+// ============================================
+// COMPONENTE CLIENTS LIST - VERSIÓN MEJORADA
+// Con soporte para actualizar el dashboard
+// ============================================
+
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal/Modal';
 import Alert from '../common/Alert/Alert';
 import ClientForm from './ClientForm';
 import ClientCard from './ClientCard';
 import clientesService from '../../services/clientes/clientes.service';
-import cobradoresService from '../../services/cobradores/cobradores.service';
 import './ClientsList.css';
 
-const ClientsList = () => {
+const ClientsList = ({ onDataChange }) => {  // 👈 Recibir la función del dashboard
   // Estados principales
   const [clientes, setClientes] = useState([]);
-  const [cobradores, setCobradores] = useState([]);
   const [filteredClientes, setFilteredClientes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -19,7 +22,7 @@ const ClientsList = () => {
   const [modalMode, setModalMode] = useState('create');
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [alert, setAlert] = useState(null);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' o 'list'
+  const [viewMode, setViewMode] = useState('grid');
   
   // Estados para carga y errores
   const [loading, setLoading] = useState(false);
@@ -27,35 +30,26 @@ const ClientsList = () => {
 
   // Cargar datos al montar el componente
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        console.log('🔄 Intentando obtener clientes de la API...');
-        console.log('URL base:', process.env.REACT_APP_API_URL);
-        
-        const clientesData = await clientesService.getAll();
-        console.log('✅ Clientes recibidos:', clientesData);
-        
-        console.log('🔄 Intentando obtener cobradores...');
-        const cobradoresData = await cobradoresService.getAll();
-        console.log('✅ Cobradores recibidos:', cobradoresData);
-        
-        setClientes(clientesData);
-        setFilteredClientes(clientesData);
-        setCobradores(cobradoresData);
-      } catch (err) {
-        console.error('❌ ERROR COMPLETO:', err);
-        console.error('Mensaje:', err.message);
-        console.error('Respuesta del servidor:', err.response);
-        setError(`Error al cargar los datos: ${err.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    loadClientes();
   }, []);
+
+  // ============================================
+  // FUNCIÓN PARA CARGAR CLIENTES
+  // ============================================
+  const loadClientes = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await clientesService.getAll();
+      setClientes(data);
+      setFilteredClientes(data);
+    } catch (err) {
+      setError('Error al cargar los clientes');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filtrar clientes por búsqueda
   useEffect(() => {
@@ -90,12 +84,15 @@ const ClientsList = () => {
     setModalOpen(true);
   };
 
-  // Eliminar cliente
+  // ============================================
+  // ELIMINAR CLIENTE
+  // ============================================
   const handleDelete = async (cliente) => {
     if (window.confirm(`¿Estás seguro de eliminar a ${cliente.nombre}?`)) {
       try {
         await clientesService.delete(cliente._id);
-        setClientes(prev => prev.filter(c => c._id !== cliente._id));
+        await loadClientes(); // Recargar lista
+        if (onDataChange) onDataChange(); // 👈 Notificar al dashboard
         showAlert('success', 'Cliente eliminado exitosamente');
       } catch (err) {
         showAlert('error', 'Error al eliminar el cliente');
@@ -104,20 +101,27 @@ const ClientsList = () => {
     }
   };
 
-  // Guardar cliente (crear o editar)
+  // ============================================
+  // GUARDAR CLIENTE (Crear o Actualizar)
+  // ============================================
   const handleSave = async (clienteData) => {
     try {
       if (modalMode === 'create') {
-        const nuevoCliente = await clientesService.create(clienteData);
-        setClientes(prev => [...prev, nuevoCliente]);
+        await clientesService.create(clienteData);
         showAlert('success', 'Cliente creado exitosamente');
       } else {
-        const clienteActualizado = await clientesService.update(selectedCliente._id, clienteData);
-        setClientes(prev => prev.map(c => 
-          c._id === selectedCliente._id ? clienteActualizado : c
-        ));
+        await clientesService.update(selectedCliente._id, clienteData);
         showAlert('success', 'Cliente actualizado exitosamente');
       }
+      
+      // Recargar lista de clientes
+      await loadClientes();
+      
+      // Notificar al dashboard para que actualice sus estadísticas
+      if (onDataChange) {
+        onDataChange(); // 👈 Esto hará que el dashboard recargue todos los datos
+      }
+      
       setModalOpen(false);
     } catch (err) {
       showAlert('error', `Error al ${modalMode === 'create' ? 'crear' : 'actualizar'} el cliente`);
@@ -127,7 +131,6 @@ const ClientsList = () => {
 
   return (
     <div className="clients-container">
-      {/* Alertas */}
       {alert && (
         <Alert
           type={alert.type}
@@ -136,7 +139,6 @@ const ClientsList = () => {
         />
       )}
 
-      {/* Mensaje de error */}
       {error && (
         <div className="error-banner">
           {error}
@@ -147,7 +149,6 @@ const ClientsList = () => {
       <div className="clients-header">
         <h2>Clientes</h2>
         <div className="header-actions">
-          {/* Buscador */}
           <div className="search-box">
             <span className="search-icon">🔍</span>
             <input
@@ -163,7 +164,6 @@ const ClientsList = () => {
             )}
           </div>
 
-          {/* Cambiar vista */}
           <div className="view-toggle">
             <button
               className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
@@ -181,7 +181,6 @@ const ClientsList = () => {
             </button>
           </div>
 
-          {/* Botón crear */}
           <button className="btn-create" onClick={handleCreate}>
             <span className="btn-icon">➕</span>
             Nuevo Cliente
@@ -193,8 +192,7 @@ const ClientsList = () => {
       {loading ? (
         <div className="loading-state">
           <div className="spinner"></div>
-           <p>Cargando clientes y cobradores...</p>
-    <p className="loading-hint">Esto puede tomar unos segundos si la API está "despertando"</p>
+          <p>Cargando clientes...</p>
         </div>
       ) : filteredClientes.length === 0 ? (
         <div className="empty-state">
@@ -206,7 +204,6 @@ const ClientsList = () => {
           </button>
         </div>
       ) : viewMode === 'grid' ? (
-        /* Vista de cuadrícula (tarjetas) */
         <div className="clients-grid">
           {filteredClientes.map(cliente => (
             <ClientCard
@@ -218,7 +215,6 @@ const ClientsList = () => {
           ))}
         </div>
       ) : (
-        /* Vista de tabla */
         <div className="table-responsive">
           <table className="clients-table">
             <thead>
@@ -271,7 +267,6 @@ const ClientsList = () => {
           client={selectedCliente}
           onSave={handleSave}
           onCancel={() => setModalOpen(false)}
-          cobradores={cobradores}
         />
       </Modal>
     </div>

@@ -1,55 +1,56 @@
 // ============================================
-// SERVICIO DE CLIENTES - Aquí se hacen las llamadas
+// SERVICIO DE CLIENTES - VERSIÓN CORREGIDA
 // ============================================
 
 import httpClient from '../api/http-client';
 import { API_ENDPOINTS } from '../../core/config/api.config';
 
 const clientesService = {
-
-  // --- Para LISTAR todos los clientes (GET /api/clientes) ---
+  // Obtener todos los clientes
   getAll: async () => {
     try {
-      // httpClient.get(API_ENDPOINTS.CLIENTES.BASE) hará una petición GET a la URL + '/clientes'
-      const response = await httpClient.get(API_ENDPOINTS.CLIENTES.BASE);
-      // ¡Ojo! Como tu API devuelve el array directamente, la respuesta YA es el array.
-      return response; 
-    } catch (error) {
-      console.error('Error al obtener clientes:', error);
-      throw error; // Lanzamos el error para que quien llame a esta función sepa que falló
-    }
-  },
-
-  // --- Para CREAR un nuevo cliente (POST /api/clientes) ---
-  create: async (clienteData) => {
-    try {
-      // clienteData debe ser un objeto como { nombre, cedula, direccion, celular, cobrador_id }
-      const response = await httpClient.post(API_ENDPOINTS.CLIENTES.BASE, clienteData);
-      return response; // La respuesta será el cliente creado (con su _id)
-    } catch (error) {
-      console.error('Error al crear cliente:', error);
-      throw error;
-    }
-  },
-
-  // --- Para ACTUALIZAR un cliente (PUT /api/clientes/:id) ---
-  update: async (id, clienteData) => {
-    try {
-      const response = await httpClient.put(API_ENDPOINTS.CLIENTES.UPDATE(id), clienteData);
+      console.log('📤 GET:', API_ENDPOINTS.CLIENTES.GET_ALL);
+      const response = await httpClient.get(API_ENDPOINTS.CLIENTES.GET_ALL);
       return response;
     } catch (error) {
-      console.error(`Error al actualizar cliente ${id}:`, error);
+      console.error('Error al obtener clientes:', error);
       throw error;
     }
   },
 
-  // --- Para ELIMINAR un cliente (DELETE /api/clientes/:id) ---
+  // Crear nuevo cliente
+ create: async (clienteData) => {
+  try {
+    console.log('📤 POST a:', API_ENDPOINTS.CLIENTES.CREATE);
+    const response = await httpClient.post(API_ENDPOINTS.CLIENTES.CREATE, clienteData);
+    return response;
+  } catch (error) {
+    console.error('Error al crear cliente:', error);
+    throw error;
+  }
+},
+
+  // Actualizar cliente
+  update: async (id, clienteData) => {
+    try {
+      const url = API_ENDPOINTS.CLIENTES.UPDATE(id);
+      console.log('📤 PUT a:', url);
+      const response = await httpClient.put(url, clienteData);
+      return response;
+    } catch (error) {
+      console.error('Error al actualizar cliente:', error);
+      throw error;
+    }
+  },
+
+  // Eliminar cliente
   delete: async (id) => {
     try {
-      await httpClient.delete(API_ENDPOINTS.CLIENTES.DELETE(id));
-      // No necesitas retornar nada cuando es DELETE, solo saber que fue exitoso
+      const url = API_ENDPOINTS.CLIENTES.DELETE(id);
+      console.log('📤 DELETE a:', url);
+      await httpClient.delete(url);
     } catch (error) {
-      console.error(`Error al eliminar cliente ${id}:`, error);
+      console.error('Error al eliminar cliente:', error);
       throw error;
     }
   }

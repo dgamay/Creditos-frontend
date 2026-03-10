@@ -2,16 +2,28 @@
 // COMPONENTE TARJETA DE CRÉDITO
 // Adaptado al modelo del backend
 // ============================================
+// ============================================
+// COMPONENTE TARJETA DE CRÉDITO
+// Incluye botón para marcar como pagado y calcular comisión
+// ============================================
 
-import React from 'react';
+import React, { useState } from 'react';
 import './CreditCard.css';
 
-const CreditCard = ({ credit, onViewDetails }) => {
-  if (!credit) return null;
+/**
+ * Tarjeta que muestra la información de un crédito
+ * @param {Object} credit - Datos del crédito
+ * @param {Function} onViewDetails - Función para ver detalles
+ * @param {Function} onMarkAsPaid - Función para marcar como pagado (nueva)
+ * @param {Array} collectors - Lista de cobradores para asignar comisión
+ */
+const CreditCard = ({ credit, onViewDetails, onMarkAsPaid, collectors = [] }) => {
+  const [showPaidModal, setShowPaidModal] = useState(false);
+  const [selectedCollectorId, setSelectedCollectorId] = useState(credit.cobrador_id || '');
 
   // Formatear fechas
   const formatDate = (dateString) => {
-    if (!dateString) return 'No disponible';
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('es-CO');
   };
 
@@ -24,83 +36,162 @@ const CreditCard = ({ credit, onViewDetails }) => {
     }).format(value || 0);
   };
 
-  // Calcular días restantes para vencimiento
-  const calculateDaysLeft = () => {
-    if (!credit.fecha_pago) return null;
+  // Calcular estado visual
+  const getStatusInfo = () => {
+    if (credit.estado === 'pagado') {
+      return { class: 'pagado', label: 'Pagado', icon: '✅' };
+    }
+    
     const today = new Date();
     const paymentDate = new Date(credit.fecha_pago);
-    const diffTime = paymentDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    
+    if (paymentDate < today) {
+      return { class: 'vencido', label: 'Vencido', icon: '⚠️' };
+    }
+    
+    return { class: 'pendiente', label: 'Pendiente', icon: '⏳' };
   };
 
-  const daysLeft = calculateDaysLeft();
-  const isOverdue = daysLeft < 0 && credit.estado === 'pendiente';
+  const status = getStatusInfo();
 
-  // Determinar estado visual
-  const getStatusClass = () => {
-    if (credit.estado === 'pagado') return 'pagado';
-    if (isOverdue) return 'vencido';
-    return 'pendiente';
+  // Manejar clic en marcar como pagado
+  const handleMarkAsPaid = () => {
+    if (!selectedCollectorId) {
+      alert('Debes seleccionar un cobrador para asignar la comisión');
+      return;
+    }
+    onMarkAsPaid(credit._id, selectedCollectorId);
+    setShowPaidModal(false);
   };
 
-  const getStatusText = () => {
-    if (credit.estado === 'pagado') return 'Pagado';
-    if (isOverdue) return 'Vencido';
-    return 'Pendiente';
-  };
+  // Calcular comisión (20%)
+  const comision = credit.monto_prestado ? credit.monto_prestado * 0.2 : 0;
 
   return (
-    <div className="credit-card" onClick={() => onViewDetails(credit)}>
-      <div className="credit-card-header">
-        <div className="client-info">
-          <h3>{credit.clienteNombre || 'Cliente'}</h3>
-          <span className="credit-id">Cédula: {credit.clienteCedula || 'N/A'}</span>
+    <>
+      <div className={`credit-card status-${status.class}`} onClick={() => onViewDetails(credit)}>
+        <div className="credit-card-header">
+          <div className="client-info">
+            <h3>{credit.clienteNombre || 'Cliente'}</h3>
+            <p className="client-doc">CC: {credit.clienteCedula || 'N/A'}</p>
+          </div>
+          <div className={`status-badge ${status.class}`}>
+            {status.icon} {status.label}
+          </div>
         </div>
-        <span className={`credit-status status-${getStatusClass()}`}>
-          {getStatusText()}
-        </span>
-      </div>
 
-      <div className="credit-card-body">
-        <div className="amounts-section">
+        <div className="credit-card-body">
           <div className="amount-row">
-            <span className="label">💰 Monto prestado:</span>
+            <span className="label">Monto prestado:</span>
             <span className="value">{formatCurrency(credit.monto_prestado)}</span>
           </div>
-          <div className="amount-row total">
-            <span className="label">💵 Total a pagar:</span>
-            <span className="value">{formatCurrency(credit.monto_por_pagar)}</span>
+          
+          <div className="amount-row">
+            <span className="label">Total a pagar:</span>
+            <span className="value total">{formatCurrency(credit.monto_por_pagar)}</span>
           </div>
-        </div>
 
-        <div className="dates-section">
+          <div className="amount-row interest">
+            <span className="label">Interés (30%):</span>
+            <span className="value">{formatCurrency(credit.monto_por_pagar - credit.monto_prestado)}</span>
+          </div>
+
+          {/* Mostrar comisión si el crédito está pagado */}
+          {credit.estado === 'pagado' && credit.comision_cobrador && (
+            <div className="comision-row">
+              <span className="label">Comisión cobrador (20%):</span>
+              <span className="value comision">{formatCurrency(credit.comision_cobrador)}</span>
+            </div>
+          )}
+
           <div className="date-row">
-            <span className="label">📅 Fecha origen:</span>
+            <span className="label">Fecha origen:</span>
             <span className="value">{formatDate(credit.fecha_origen)}</span>
           </div>
+
           <div className="date-row">
-            <span className="label">⏰ Fecha pago:</span>
-            <span className="value">{formatDate(credit.fecha_pago)}</span>
+            <span className="label">Fecha pago:</span>
+            <span className={`value ${status.class}`}>{formatDate(credit.fecha_pago)}</span>
           </div>
-          {credit.estado === 'pendiente' && daysLeft !== null && (
-            <div className={`date-row days-left ${isOverdue ? 'expired' : daysLeft <= 3 ? 'warning' : ''}`}>
-              <span className="label">⏳ Días restantes:</span>
-              <span className="value">
-                {isOverdue ? `${Math.abs(daysLeft)} días vencido` : `${daysLeft} días`}
-              </span>
+
+          {credit.cobrador && (
+            <div className="collector-row">
+              <span className="label">Cobrador:</span>
+              <span className="value">{credit.cobrador}</span>
             </div>
           )}
         </div>
 
-        {credit.cobrador && (
-          <div className="collector-info">
-            <span className="label">👤 Cobrador:</span>
-            <span className="value">{credit.cobrador}</span>
-          </div>
-        )}
+        <div className="credit-card-footer">
+          <button 
+            className="card-action view"
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewDetails(credit);
+            }}
+          >
+            👁️ Ver detalles
+          </button>
+          
+          {/* Botón para marcar como pagado (solo si no está pagado) */}
+          {credit.estado !== 'pagado' && (
+            <button 
+              className="card-action pay"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowPaidModal(true);
+              }}
+            >
+              💰 Marcar pagado
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Modal para marcar como pagado y asignar cobrador */}
+      {showPaidModal && (
+        <div className="modal-overlay" onClick={() => setShowPaidModal(false)}>
+          <div className="modal-content small" onClick={e => e.stopPropagation()}>
+            <h3>Marcar crédito como pagado</h3>
+            
+            <div className="modal-body">
+              <p><strong>Cliente:</strong> {credit.clienteNombre}</p>
+              <p><strong>Monto prestado:</strong> {formatCurrency(credit.monto_prestado)}</p>
+              <p><strong>Comisión del cobrador (20%):</strong> <span className="comision">{formatCurrency(comision)}</span></p>
+              
+              <div className="form-group">
+                <label htmlFor="collector">Selecciona el cobrador que recibirá la comisión:</label>
+                <select
+                  id="collector"
+                  value={selectedCollectorId}
+                  onChange={(e) => setSelectedCollectorId(e.target.value)}
+                >
+                  <option value="">-- Selecciona un cobrador --</option>
+                  {collectors.map(c => (
+                    <option key={c._id} value={c._id}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="modal-actions">
+                <button className="btn-cancel" onClick={() => setShowPaidModal(false)}>
+                  Cancelar
+                </button>
+                <button 
+                  className="btn-save" 
+                  onClick={handleMarkAsPaid}
+                  disabled={!selectedCollectorId}
+                >
+                  Confirmar pago
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -135,3 +135,73 @@
   background: #FF3B30;
   color: white;
 }
+
+/* ============================================
+   ESTILOS PARA EL BADGE DE DEUDA
+   ============================================ */
+
+.deuda-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.deuda-badge.activo {
+  background: #E3F2FD;
+  color: #00A0DF;
+}
+
+.deuda-badge.vencido {
+  background: #FFEBEE;
+  color: #FF3B30;
+}
+
+.deuda-badge.sin_deuda {
+  background: #E3F7E3;
+  color: #34C759;
+}
+
+/* ============================================
+   SECCIÓN DE DEUDA EN LA TARJETA
+   ============================================ */
+
+.deuda-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #E0E0E0;
+}
+
+.deuda-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.deuda-row:last-child {
+  margin-bottom: 0;
+}
+
+.deuda-label {
+  color: #666;
+  font-weight: 500;
+}
+
+.deuda-monto {
+  color: #00A0DF;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.deuda-count {
+  background: #E3F2FD;
+  color: #00A0DF;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 12px;
+}

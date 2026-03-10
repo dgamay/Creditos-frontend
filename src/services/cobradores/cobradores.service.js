@@ -8,10 +8,10 @@ import { API_ENDPOINTS } from '../../core/config/api.config';
 import creditsService from '../credits/creditos.service';
 
 const cobradoresService = {
-  // Obtener todos los cobradores
   getAll: async () => {
     try {
-      const response = await httpClient.get(API_ENDPOINTS.COBRADORES.BASE);
+      console.log('📤 GET:', API_ENDPOINTS.COBRADORES.GET_ALL);
+      const response = await httpClient.get(API_ENDPOINTS.COBRADORES.GET_ALL);
       return response;
     } catch (error) {
       console.error('Error al obtener cobradores:', error);
