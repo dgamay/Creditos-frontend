@@ -1,77 +1,50 @@
-/**
- * Componente Login - Inspirado en Nequi
- * Características:
- * - Diseño minimalista y moderno
- * - Validación en tiempo real
- * - Feedback visual inmediato
- * - Animaciones suaves
- */
-
 import React, { useState } from 'react';
-import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiHome } from 'react-icons/fi';
 import Input from '../common/Input/Input';
 import Button from '../common/Button/Button';
 import './Login.css';
 
 const Login = ({ onLoginSuccess }) => {
-  // Estados del formulario
   const [formData, setFormData] = useState({
-    email: 'rtey@rhl.com',
-    password: '123456'
+    empresa: '',
+    email: '',
+    password: ''
   });
 
-  // Estados de UI
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  /**
-   * Valida el email en tiempo real
-   * @param {string} email - Email a validar
-   * @returns {boolean} - true si es válido
-   */
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   };
 
-  /**
-   * Valida la contraseña
-   * @param {string} password - Contraseña a validar
-   * @returns {boolean} - true si es válida
-   */
-  const validatePassword = (password) => {
-    return password.length >= 6;
+  const validatePassword = (password) => password.length >= 6;
+
+  // ✅ Validar empresa: solo letras, números y guiones (igual que el backend)
+  const validateEmpresa = (empresa) => {
+    const re = /^[a-zA-Z0-9\-]+$/;
+    return re.test(empresa) && empresa.length >= 2;
   };
 
-  /**
-   * Maneja cambios en los inputs
-   * @param {Event} e - Evento del input
-   */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // Limpiar error del campo cuando el usuario empieza a escribir
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
-  /**
-   * Valida todo el formulario
-   * @returns {boolean} - true si es válido
-   */
   const validateForm = () => {
     const newErrors = {};
+
+    if (!formData.empresa) {
+      newErrors.empresa = 'El nombre de la empresa es requerido';
+    } else if (!validateEmpresa(formData.empresa)) {
+      newErrors.empresa = 'Solo letras, números y guiones. Mínimo 2 caracteres';
+    }
 
     if (!formData.email) {
       newErrors.email = 'El correo es requerido';
@@ -89,26 +62,23 @@ const Login = ({ onLoginSuccess }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  /**
-   * Maneja el envío del formulario
-   * @param {Event} e - Evento del formulario
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
 
-    // Simular llamada a API
     setTimeout(() => {
       setIsLoading(false);
-      // Aquí iría la lógica real de autenticación
+
+      // ✅ Guardar tenant en localStorage para que http-client lo use
+      const tenantId = formData.empresa.toLowerCase().trim();
+      localStorage.setItem('tenantId', tenantId);
+
       onLoginSuccess({
         email: formData.email,
-        name: 'Usuario Credirobo'
+        name: 'Usuario Credirobo',
+        empresa: tenantId
       });
     }, 1500);
   };
@@ -116,7 +86,6 @@ const Login = ({ onLoginSuccess }) => {
   return (
     <div className="login-container">
       <div className="login-card">
-        {/* Header con logo */}
         <div className="login-header">
           <div className="logo-container">
             <span className="logo-icon">💰</span>
@@ -126,8 +95,22 @@ const Login = ({ onLoginSuccess }) => {
           <p className="subtitle">Ingresa tus datos para continuar</p>
         </div>
 
-        {/* Formulario de login */}
         <form onSubmit={handleSubmit} className="login-form">
+
+          {/* ✅ Campo empresa nuevo */}
+          <Input
+            type="text"
+            name="empresa"
+            label="Nombre de empresa"
+            value={formData.empresa}
+            onChange={handleChange}
+            error={errors.empresa}
+            icon={<FiHome />}
+            required
+            autoComplete="organization"
+            placeholder="ej: empresa1"
+          />
+
           <Input
             type="email"
             name="email"
@@ -156,13 +139,11 @@ const Login = ({ onLoginSuccess }) => {
               type="button"
               className="password-toggle"
               onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
             >
               {showPassword ? <FiEyeOff /> : <FiEye />}
             </button>
           </div>
 
-          {/* Opciones adicionales */}
           <div className="login-options">
             <label className="checkbox-container">
               <input
@@ -172,32 +153,21 @@ const Login = ({ onLoginSuccess }) => {
               />
               <span className="checkbox-text">Recordarme</span>
             </label>
-            
             <a href="/forgot-password" className="forgot-link">
               ¿Olvidaste tu contraseña?
             </a>
           </div>
 
-          <Button
-            type="submit"
-            variant="primary"
-            size="large"
-            fullWidth
-            loading={isLoading}
-          >
+          <Button type="submit" variant="primary" size="large" fullWidth loading={isLoading}>
             Iniciar sesión
           </Button>
         </form>
 
-        {/* Footer con opciones adicionales */}
         <div className="login-footer">
           <p className="register-text">
             ¿No tienes una cuenta?{' '}
-            <a href="/register" className="register-link">
-              Créala aquí
-            </a>
+            <a href="/register" className="register-link">Créala aquí</a>
           </p>
-          
           <div className="security-badge">
             <span className="security-icon">🔒</span>
             <span className="security-text">Tus datos están seguros</span>
@@ -205,7 +175,6 @@ const Login = ({ onLoginSuccess }) => {
         </div>
       </div>
 
-      {/* Decoración de fondo */}
       <div className="login-background">
         <div className="circle circle-1"></div>
         <div className="circle circle-2"></div>
