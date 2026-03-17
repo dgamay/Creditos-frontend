@@ -63,7 +63,7 @@
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
@@ -74,6 +74,7 @@
   padding: 12px;
   background: #f8fafc;
   border-radius: 12px;
+  min-width: 0;
 }
 
 .stat-icon {
@@ -83,6 +84,7 @@
 
 .stat-content {
   flex: 1;
+  max-width: 0;
 }
 
 .stat-label {
@@ -95,8 +97,11 @@
 .stat-value {
   display: block;
   color: #1e293b;
-  font-size: 16px;
+  font-size: 13px; /* ✅ reducido para que quepan montos */
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* ✅ trunca si es muy largo */
 }
 
 .progress-section {
@@ -246,4 +251,50 @@
 .card-action.delete:hover {
   background: #c62828;
   color: white;
+}
+
+@media (max-width: 480px) {
+  .collector-card-header {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .collector-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+
+  .collector-info h3 {
+    font-size: 15px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-item {
+    padding: 8px;
+  }
+
+  .stat-icon {
+    font-size: 18px;
+  }
+
+  .creditos-details {
+    gap: 6px;
+  }
+
+  .chip-value {
+    font-size: 14px;
+  }
+
+  .collector-card-body {
+    padding: 14px;
+  }
+
+  .collector-card-footer {
+    padding: 12px 14px;
+  }
 }

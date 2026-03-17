@@ -438,3 +438,48 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ✅ Botón atrás móvil */
+.btn-back-mobile {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: white;
+  border: 2px solid #E0E0E0;
+  border-radius: 10px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: all 0.2s;
+}
+
+.btn-back-mobile:hover {
+  border-color: #00A0DF;
+  color: #00A0DF;
+}
+
+@media (max-width: 768px) {
+  .btn-back-mobile {
+    display: flex; /* ✅ solo visible en móvil */
+  }
+
+  .credits-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .credits-grid {
+    grid-template-columns: 1fr; /* ✅ una columna en móvil */
+  }
+
+  /* ✅ Badge de estado no se corta */
+  .stat-item {
+    padding: 14px 10px;
+  }
+
+  .stat-value {
+    font-size: 16px;
+  }
+}

@@ -77,7 +77,7 @@ const Login = ({ onLoginSuccess }) => {
 
       onLoginSuccess({
         email: formData.email,
-        name: 'Usuario Credirobo',
+        name: 'Usuario CrediAgil',
         empresa: tenantId
       });
     }, 1500);
@@ -89,7 +89,7 @@ const Login = ({ onLoginSuccess }) => {
         <div className="login-header">
           <div className="logo-container">
             <span className="logo-icon">💰</span>
-            <h1 className="logo-text">Credirobo</h1>
+            <h1 className="logo-text">CrediAgil</h1>
           </div>
           <p className="welcome-text">¡Bienvenido de vuelta!</p>
           <p className="subtitle">Ingresa tus datos para continuar</p>
@@ -108,7 +108,7 @@ const Login = ({ onLoginSuccess }) => {
             icon={<FiHome />}
             required
             autoComplete="organization"
-            placeholder="ej: empresa1"
+            placeholder="   ej: empresa1"
           />
 
           <Input

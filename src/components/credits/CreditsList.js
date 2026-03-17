@@ -18,7 +18,7 @@ import './CreditsList.css';
  * Componente principal para gestionar créditos
  * @param {Function} onDataChange - Función para notificar cambios al dashboard
  */
-const CreditsList = ({ onDataChange }) => {
+const CreditsList = ({ onDataChange, onBack }) => {
   const [credits, setCredits] = useState([]);
   const [clients, setClients] = useState([]);
   const [collectors, setCollectors] = useState([]);
@@ -183,6 +183,14 @@ const CreditsList = ({ onDataChange }) => {
 
   return (
     <div className="credits-container">
+
+      {/* ✅ Botón atrás — solo visible en móvil si se pasó onBack */}
+      {onBack && (
+        <button className="btn-back-mobile" onClick={onBack}>
+          ← Volver al inicio
+        </button>
+      )}
+
       {alert && (
         <Alert
           type={alert.type}
@@ -190,7 +198,6 @@ const CreditsList = ({ onDataChange }) => {
           onClose={() => setAlert(null)}
         />
       )}
-
       {/* Estadísticas incluyendo comisiones */}
       <div className="credits-stats">
         <div className="stat-item highlight">

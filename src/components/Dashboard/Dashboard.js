@@ -223,8 +223,14 @@ const Dashboard = ({ user, onLogout }) => {
         return <ClientsList onDataChange={cargarDatos} />;
       case 'cobradores':
         return <CobradoresList onDataChange={cargarDatos} />;
+
       case 'creditos':
-        return <CreditsList onDataChange={cargarDatos} />;
+        return (
+          <CreditsList
+            onDataChange={cargarDatos}
+            onBack={isMobile ? () => setCurrentView('inicio') : null}
+    />
+  );
       case 'reportes':
         return (
           <div className="reports-container">
@@ -321,7 +327,7 @@ const Dashboard = ({ user, onLogout }) => {
                   onClick={() => setCurrentView('clientes')}
                 >
                   <FiDollarSign className="action-icon" />
-                  <div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <strong>Clientes</strong>
                     <small>{stats.totalClientes} registros</small>
                   </div>
@@ -331,7 +337,7 @@ const Dashboard = ({ user, onLogout }) => {
                   onClick={() => setCurrentView('cobradores')}
                 >
                   <MdHandshake className="action-icon" />
-                  <div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <strong>Cobradores</strong>
                     <small>{stats.totalCobradores} activos</small>
                   </div>
@@ -341,9 +347,9 @@ const Dashboard = ({ user, onLogout }) => {
                   onClick={() => setCurrentView('creditos')}
                 >
                   <FiCreditCard className="action-icon" />
-                  <div>
-                    <strong>Créditos</strong>
-                    <small>{stats.totalCreditos} totales</small>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <strong>Clientes</strong>
+                    <small>{stats.totalClientes} registros</small>
                   </div>
                 </button>
                 <button 
@@ -351,7 +357,7 @@ const Dashboard = ({ user, onLogout }) => {
                   onClick={() => setCurrentView('reportes')}
                 >
                   <FiBarChart2 className="action-icon" />
-                  <div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <strong>Reportes</strong>
                     <small>Estadísticas</small>
                   </div>
@@ -369,7 +375,7 @@ const Dashboard = ({ user, onLogout }) => {
         <div className="sidebar-header">
           <div className="logo-container">
             <span className="logo-icon">📊</span>
-            <h2>Credirobo Business</h2>
+            <h2>CrediAgil Business</h2>
           </div>
           {isMobile && (
             <button 
@@ -404,7 +410,7 @@ const Dashboard = ({ user, onLogout }) => {
             </div>
             <div className="user-details">
               <span className="user-name">{user?.name || 'Usuario'}</span>
-              <span className="user-email">{user?.email || 'usuario@credirobo.com'}</span>
+              <span className="user-email">{user?.email || 'usuario@crediAgil.com'}</span>
             </div>
           </div>
           <button onClick={onLogout} className="logout-button">

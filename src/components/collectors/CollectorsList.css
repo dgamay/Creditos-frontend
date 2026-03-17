@@ -208,15 +208,24 @@
 }
 
 @media (max-width: 768px) {
+  .collector-details-modal {
+    padding: 12px;
+  }
+
   .details-grid-principal {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr; /* ✅ 2 columnas en lugar de 4 */
+    gap: 10px;
   }
-  
-  .estado-creditos {
-    grid-template-columns: 1fr;
+
+  .detail-card {
+    padding: 12px;
   }
-  
+
+  .detail-value.large {
+    font-size: 16px; /* ✅ reduce tamaño de fuente */
+  }
+
   .contacto-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* ✅ una columna */
   }
 }
